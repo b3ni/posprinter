@@ -42,6 +42,8 @@ var react_native_1 = require("react-native");
 var isAndroid = react_native_1.Platform.OS === 'android';
 var rn_fetch_blob_1 = __importDefault(require("rn-fetch-blob"));
 var printerCommand_1 = require("./printerCommand");
+exports.PrinterConstants = printerCommand_1.PrinterConstants;
+exports.Printertools = printerCommand_1.Printertools;
 var PrinterModule = /** @class */ (function () {
     function PrinterModule() {
         this.isDebug = false;
@@ -100,6 +102,13 @@ var PrinterModule = /** @class */ (function () {
             return _this.initiatePrintReceipt();
         });
     };
+    PrinterModule.prototype.connectAndPrintCommands = function (deviceId, commands) {
+        var _this = this;
+        return this.connectDevice(deviceId, 3000)
+            .then(function () {
+            return _this.printCommands(commands);
+        });
+    };
     // listen all changed state from native events
     PrinterModule.prototype.listenToNativeEvent = function (start) {
         var _this = this;
@@ -150,37 +159,44 @@ var PrinterModule = /** @class */ (function () {
     // printer all commands to printer
     PrinterModule.prototype.printTestReceipt = function (storageUrl) {
         return __awaiter(this, void 0, void 0, function () {
-            var cmd, e_1;
+            var cmd;
+            return __generator(this, function (_a) {
+                cmd = [
+                    printerCommand_1.printerCommand.setPrinter(printerCommand_1.PrinterConstants.Command.ALIGN, printerCommand_1.PrinterConstants.Command.ALIGN_CENTER),
+                    printerCommand_1.printerCommand.setFont(1, 0, 2, 0),
+                ];
+                cmd.push(printerCommand_1.printerCommand.printLine('RECEIPT TITLE'));
+                cmd.push(printerCommand_1.printerCommand.printSeparator30('-----'));
+                cmd.push(printerCommand_1.printerCommand.printKeyValue30(printerCommand_1.Printertools.generateKeyValuePair('', 'Price', 0), '50$'));
+                cmd.push(printerCommand_1.printerCommand.printLine(''));
+                if (storageUrl)
+                    cmd.push(printerCommand_1.printerCommand.printImageFromStorage(storageUrl));
+                cmd.push(printerCommand_1.printerCommand.printLine(''));
+                cmd.push(printerCommand_1.printerCommand.setFont(-2, -2, 0, 0));
+                cmd.push(printerCommand_1.printerCommand.printText('end of receipt'));
+                cmd.push(printerCommand_1.printerCommand.printLine(''));
+                this.printCommands(cmd);
+                return [2 /*return*/];
+            });
+        });
+    };
+    PrinterModule.prototype.printCommands = function (commands) {
+        return __awaiter(this, void 0, void 0, function () {
+            var e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        cmd = [
-                            printerCommand_1.printerCommand.setPrinter(printerCommand_1.PrinterConstants.Command.ALIGN, printerCommand_1.PrinterConstants.Command.ALIGN_CENTER),
-                            printerCommand_1.printerCommand.setFont(1, 0, 2, 0),
-                        ];
-                        cmd.push(printerCommand_1.printerCommand.printLine('RECEIPT TITLE'));
-                        cmd.push(printerCommand_1.printerCommand.printSeparator30('-----'));
-                        cmd.push(printerCommand_1.printerCommand.printKeyValue30(printerCommand_1.Printertools.generateKeyValuePair('', 'Price', 0), '50$'));
-                        cmd.push(printerCommand_1.printerCommand.printLine(''));
-                        if (storageUrl)
-                            cmd.push(printerCommand_1.printerCommand.printImageFromStorage(storageUrl));
-                        cmd.push(printerCommand_1.printerCommand.printLine(''));
-                        cmd.push(printerCommand_1.printerCommand.setFont(-2, -2, 0, 0));
-                        cmd.push(printerCommand_1.printerCommand.printText('end of receipt'));
-                        cmd.push(printerCommand_1.printerCommand.printLine(''));
-                        _a.label = 1;
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.printerModule.addCommands(commands)];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, this.printerModule.addCommands(cmd)];
-                    case 2:
                         _a.sent();
                         if (this.deviceEventEmitter)
                             this.deviceEventEmitter.remove();
                         return [2 /*return*/];
-                    case 3:
+                    case 2:
                         e_1 = _a.sent();
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -188,5 +204,7 @@ var PrinterModule = /** @class */ (function () {
     return PrinterModule;
 }());
 var printer = new PrinterModule();
+var Command = printerCommand_1.printerCommand;
+exports.Command = Command;
 exports.default = printer;
 //# sourceMappingURL=index.js.map

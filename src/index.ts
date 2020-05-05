@@ -86,6 +86,13 @@ class PrinterModule {
             });
     }
 
+    public connectAndPrintCommands(deviceId: string, commands: PrinterCommand[]): Promise<void> {
+        return this.connectDevice(deviceId, 3000)
+            .then(() => {
+                return this.printCommands(commands);
+            });
+    }
+
     // listen all changed state from native events
     private listenToNativeEvent(start: boolean): void {
         if (start) {
@@ -152,8 +159,12 @@ class PrinterModule {
         cmd.push(printerCommand.printText('end of receipt'));
         cmd.push(printerCommand.printLine(''));
 
+        this.printCommands(cmd);
+    }
+
+    private async printCommands(commands: PrinterCommand[]) {
         try {
-            await this.printerModule.addCommands(cmd);
+            await this.printerModule.addCommands(commands);
             if (this.deviceEventEmitter)
                 this.deviceEventEmitter.remove();
             return;
@@ -162,4 +173,11 @@ class PrinterModule {
 }
 
 const printer: PrinterModule = new PrinterModule();
+const Command = printerCommand;
+
+export {
+    Command,
+    Printertools,
+    PrinterConstants,
+};
 export default printer;
